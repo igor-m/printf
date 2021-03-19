@@ -30,6 +30,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+// 19-Mar-2021 MOD by igor-m: printing out full 15 digits precsion with 64bit double
+// ie %1.15f  
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -73,7 +76,7 @@
 // define the default floating point precision
 // default: 6 digits
 #ifndef PRINTF_DEFAULT_FLOAT_PRECISION
-#define PRINTF_DEFAULT_FLOAT_PRECISION  6U
+#define PRINTF_DEFAULT_FLOAT_PRECISION  15U
 #endif
 
 // define the largest float suitable to print with %f
@@ -343,7 +346,18 @@ static size_t _ftoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, d
   double diff = 0.0;
 
   // powers of 10
-  static const double pow10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
+    // powers of 10
+  static const double pow10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 
+								10000000, 
+								100000000, 
+								1000000000,
+								10000000000,
+								100000000000,
+								1000000000000,
+								10000000000000,
+								100000000000000,
+								1000000000000000, 
+								10000000000000000};
 
   // test for special values
   if (value != value)
@@ -374,15 +388,15 @@ static size_t _ftoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, d
   if (!(flags & FLAGS_PRECISION)) {
     prec = PRINTF_DEFAULT_FLOAT_PRECISION;
   }
-  // limit precision to 9, cause a prec >= 10 can lead to overflow errors
-  while ((len < PRINTF_FTOA_BUFFER_SIZE) && (prec > 9U)) {
+  // limit precision to 15, cause a prec >= 16 can lead to overflow errors
+  while ((len < PRINTF_FTOA_BUFFER_SIZE) && (prec > 15U)) {
     buf[len++] = '0';
     prec--;
   }
 
-  int whole = (int)value;
+  int64_t whole = (int64_t)value;
   double tmp = (value - whole) * pow10[prec];
-  unsigned long frac = (unsigned long)tmp;
+  uint64_t frac = (uint64_t)tmp;
   diff = tmp - frac;
 
   if (diff > 0.5) {
